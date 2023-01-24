@@ -4,9 +4,11 @@ import os
 import sys
 import pathlib
 w_dir=os.getcwd()
-item_types=['.h','.o']
+item_types=['.o']
 def obj_libs(directory):
     # print(directory)
+    if(os.path.isdir(directory)==False):
+        return ''
     dir_content = os.listdir(directory)
     # print('scaning directory {} {}'.format(directory,os.path.basename(directory)))
     base_dir=os.path.basename(directory)
@@ -20,7 +22,7 @@ def obj_libs(directory):
 
             item_path=os.path.join(directory,dir_item)
 
-            if(os.path.isfile(item_path) and (base_dir =='lib')):
+            if(os.path.isfile(item_path) and (base_dir =='obj')):
                 if(item_type in item_types):
                     files.append(item_path)
             elif(os.path.isdir(item_path)):
@@ -30,9 +32,8 @@ def obj_libs(directory):
     return files
 
 # lib_path=os.path.join(w_dir,'lib')
-lib_path='lib'
+lib_path='obj'
 result=obj_libs(lib_path)
 # print(result)
 for item in result:
     print(item,end=' ')
-

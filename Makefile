@@ -24,6 +24,9 @@ OBJ_PATH = obj/
 # external libraries
 EXTR_LIB_PATH = ../lab_libs/
 
+SUB_LIBS=$('python3 lib_scan_h.py')
+SUB_OBJS=$('python3 obj_scan_o.py')
+
 # LD_LIBS=-lpthread
 # genarate file paths
 MAIN_SRC = $(wildcard $(MAIN_SRC_PATH)*$(TYPE))
@@ -38,7 +41,10 @@ LIBS_HDR = $(wildcard $(LIB_PATH)*.h)
 
 EXTR_OBJ = $(wildcard $(EXTR_LIB_PATH)*.o)
 
-SUB_LIBS = $(wildcard $(LIB_PATH)/*.o)
+SUB_LIBS=$(shell python3 lib_scan_h.py)
+SUB_OBJS=$(shell python3 obj_scan_o.py)
+
+# SUB_LIBS = $(wildcard $(LIB_PATH)/*.o)
 
 # Extrenal Library Conflict
 # EXTR_OBJ_EX_HEAD = LIBS_OBJ_HEAD - EXTR_OBJ_HEAD heads of exclusive headers in lib
@@ -66,7 +72,7 @@ all_no_msg : bin_dirs $(LIBS_OBJ) $(MAIN_BIN) $(TST_BIN)
 all_msg :
 recu_libs :
 
-init : src_dirs init_msg readme
+init : src_dirs init_msg readme make_scripts
 init_msg :
 	@echo
 	@echo " Project init"
@@ -88,6 +94,10 @@ readme :
 	@echo "put your test codes here\noutputs will be generated at "$(TST_BIN_PATH) > $(TST_SRC_PATH)/read_me.txt
 	@echo "put your source codes here\noutputs will be generated at "$(MAIN_BIN_PATH) > $(MAIN_SRC_PATH)/read_me.txt
 
+make_scripts :
+	@sudo chmod +x *.py
+	@echo $(SUB_LIBS)
+	@echo $(SUB_OBJS)
 bins : bin_msg bin_dirs $(MAIN_BIN)
 bin_msg :
 	@echo
@@ -123,14 +133,14 @@ clean_tests:
 # LIBRARIES
 $(OBJ_PATH)%.o : $(LIB_PATH)%$(TYPE) $(LIBS_HDR)
 	@echo " > "$<
-	$(CC_CPP) $(FLG) -c $< -o $@ -I $(EXTR_LIB_PATH)
+	$(CC_CPP) $(FLG) -c $< -o $@ -I $(EXTR_LIB_PATH) $(SUB_LIBS)
 
 # TESTS
 $(TST_BIN_PATH)% : $(TST_SRC_PATH)%$(TYPE) $(LIBS_OBJ)
 	@echo " > "$<
-	$(CC_CPP) $(FLG) -o $@ $^ $(EXTR_OBJ_EX) -I $(LIB_PATH) -I $(EXTR_LIB_PATH)
+	$(CC_CPP) $(FLG) -o $@ $^ $(EXTR_OBJ_EX) $(SUB_OBJS) -I $(LIB_PATH) -I $(EXTR_LIB_PATH) $(SUB_LIBS)
 
 # MAIN
 $(MAIN_BIN_PATH)% : $(MAIN_SRC_PATH)%$(TYPE) $(LIBS_OBJ)
 	@echo " > "$<
-	$(CC_CPP) $(FLG) -o $@ $^ $(EXTR_OBJ_EX) -I $(LIB_PATH) -I $(EXTR_LIB_PATH)
+	$(CC_CPP) $(FLG) -o $@ $^ $(EXTR_OBJ_EX) $(SUB_OBJS) -I $(LIB_PATH) -I $(EXTR_LIB_PATH) $(SUB_LIBS)
