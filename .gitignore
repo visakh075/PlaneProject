@@ -1,3 +1,5 @@
-lib/*
-src/*
-t_src/*
+bin/*
+obj/*
+t_bin/*
+*.log
+log\*

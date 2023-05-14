@@ -3,10 +3,13 @@
 import os
 import sys
 import pathlib
-w_dir=os.getcwd()
-item_types=['.o']
-def obj_libs(directory):
+import re
+
+def ScanObjects(directory):
     # print(directory)
+    SkipDir=os.path.join(os.getcwd(),'obj')
+    # SkipDir=directory+'obj'
+    
     if(os.path.isdir(directory)==False):
         return ''
     dir_content = os.listdir(directory)
@@ -22,18 +25,29 @@ def obj_libs(directory):
 
             item_path=os.path.join(directory,dir_item)
 
-            if(os.path.isfile(item_path) and (base_dir =='obj')):
+            if(os.path.isfile(item_path) and (base_dir =='obj') and directory!=SkipDir):
                 if(item_type in item_types):
                     files.append(item_path)
             elif(os.path.isdir(item_path)):
                 # if(dir_item=='lib'):
-                files.extend(obj_libs(item_path))
+                files.extend(ScanObjects(item_path))
                 # pass
     return files
 
-# lib_path=os.path.join(w_dir,'lib')
-lib_path='obj'
-result=obj_libs(lib_path)
-# print(result)
-for item in result:
-    print(item,end=' ')
+WorkDir=os.getcwd()
+item_types=['.o']
+OutputType = 0
+
+if len(sys.argv) > 1:
+    # Access the command-line arguments starting from index 1
+    # sys.argv[0] is the script name itself
+    if(sys.argv[1]=='list'):
+        OutputType=1
+
+ScanResults=ScanObjects(WorkDir)
+#print(os.path.basename(WorkDir))
+for item in ScanResults:
+    if(OutputType == 0):
+        print(re.sub(WorkDir+'/',"",item),end=' ')
+    elif(OutputType == 1):
+        print(re.sub(WorkDir+'/',"",item),end='\n')
