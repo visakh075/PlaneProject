@@ -8,7 +8,7 @@ CC_CPP := gcc
 ifeq ($(TYPE),.c)
         CC_CPP := gcc
 else
-        CC_CPP := clang++
+        CC_CPP := g++
 endif
 
 CROSS:=TRUE
@@ -64,7 +64,7 @@ EXTR_OBJ = $(wildcard $(EXTR_LIB_PATH)*.o)
 
 # libraries in the /lib folder is used if it extst in the ../lab_libs
 
-# SUB_LIB_HDRS = $(wildcard $(LIB_PATH)/*.o)
+SUB_LIB_HDRS = $(wildcard $(LIB_PATH)/*.o)
 
 # Extrenal Library Conflict
 # EXTR_OBJ_EX_HEAD = LIBS_OBJ_HEAD - EXTR_OBJ_HEAD heads of exclusive headers in lib
@@ -124,15 +124,19 @@ pd_export:
 # LIBRARIES
 $(OBJ_PATH)%.o : $(LIB_PATH)%$(TYPE) $(LIBS_HDR)
 	
-	@echo "---$<---" >> "$(LOG_PATH)libs_builds.log"	
+	@echo "---$<---" >> "$(LOG_PATH)libs_builds.log"
+
+#	for compiling libraries you only need to compile the c/cpp file not the objects of other libraries
 	@($(CC_CPP) $(FLG) -c $< -o $@ $(SUB_LIBS_SRC) 2>> "$(LOG_PATH)libs_builds.log" && echo - $< $(DONE))||(echo - $< $(FAIL) && echo $(LOG_PATH)libs_builds.log &&exit 1)
+
 # TESTS
 $(TST_BIN_PATH)% : $(TST_SRC_PATH)%$(TYPE) $(LIBS_OBJ) $(SUB_LIBS_OBJ)
 	
 	@echo "---$<---" >> "$(LOG_PATH)tests_builds.log"
 	@($(CC_CPP) $(FLG) -o $@ $^ -I $(LIB_PATH) $(SUB_LIBS_SRC) 2>>"$(LOG_PATH)tests_builds.log" && echo - $< $(DONE))||(echo - $< $(FAIL) &&  exit 1)
+
 # MAIN
 $(MAIN_BIN_PATH)% : $(MAIN_SRC_PATH)%$(TYPE) $(LIBS_OBJ) $(SUB_LIBS_OBJ)
 
 	@echo "---$<---">> "$(LOG_PATH)main_build.log"
-	@($(CC_CPP) $(FLG) -o $@ $^ -I $(LIB_PATH) $(SUB_LIBS_SRC) 2>>"$(LOG_PATH)main_build.log" && echo - $< $(DONE))||(echo - $< $(FAIL) && exit 1)
+	@($(CC_CPP) $(FLG) -o $@ $^ -I $(LIB_PATH) $(SUB_LIBS_HDR) $(SUB_LIBS_SRC) 2>>"$(LOG_PATH)main_build.log" && echo - $< $(DONE))||(echo - $< $(FAIL) && exit 1)
